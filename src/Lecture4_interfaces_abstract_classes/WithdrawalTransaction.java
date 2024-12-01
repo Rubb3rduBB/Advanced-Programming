@@ -5,8 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Calendar;
 
 public class WithdrawalTransaction extends BaseTransaction {
-    public WithdrawalTransaction(int amount, @NotNull Calendar date) {
-        super(amount, date);
+    public WithdrawalTransaction(double amount, Calendar date, String transactionID) {
+        super(amount, date, transactionID);
     }
 
     private boolean checkDepositAmount(int amt) {
@@ -30,16 +30,24 @@ public class WithdrawalTransaction extends BaseTransaction {
     /*
     Oportunity for assignment: implementing different form of withdrawal
      */
-    public void apply(BankAccount ba) {
-        double curr_balance = ba.getBalance();
-        if (curr_balance > getAmount()) {
-            double new_balance = curr_balance - getAmount();
-            ba.setBalance(new_balance);
+    @Override
+    public void apply(BankAccount ba) throws InsufficientFundsException {
+        if (ba.getBalance() < amount) {
+            throw new InsufficientFundsException("Insufficient funds");
         }
+        ba.withdraw(amount);
     }
 
     /*
     Assignment 1 Q3: Write the Reverse method - a method unique to the WithdrawalTransaction Class
      */
+    public boolean reverse(BankAccount ba) {
+        if (!reversed) {
+            ba.deposit(getAmount());
+            reversed = true;
+            throw new InsufficientFundsException("Transaction reversed");
+            return true;
+        }
+        return false;
+    }
 }
-
